@@ -47,74 +47,85 @@
       5) Tell ANT to remotely redeploy
       6) Stop the container using ANT
     -->
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy-test-deployables</id>
-            <phase>pre-integration-test</phase>
-            <goals>
-              <goal>copy</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${cargo-test-applications.directory}</outputDirectory>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>org.codehaus.cargo</groupId>
-                  <artifactId>simple-war</artifactId>
-                  <type>war</type>
-                </artifactItem>
-              </artifactItems>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>start-and-deploy</id>
-            <phase>pre-integration-test</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <!-- Avoid CARGO-827: Cannot build on Windows -->
-                <replace file="${cargo-ant-buildfiles.directory}/build.xml">
-                  <replacefilter token="extensions\\ant\\samples\\remote-test/../../../../" value="" />
-                  <replacefilter token="\\" value="\" />
-                  <replacefilter token="\:" value=":" />
-                </replace>
-                <ant antfile="${cargo-ant-buildfiles.directory}/build.xml">
-                  <target name="start" />
-                  <target name="deploy" />
-                </ant>
-              </target>
-            </configuration>
-          </execution>
-          <execution>
-            <id>undeploy-redeploy-and-stop</id>
-            <phase>post-integration-test</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <ant antfile="${cargo-ant-buildfiles.directory}/build.xml">
-                  <target name="undeploy" />
-                  <target name="redeploy" />
-                  <target name="stop" />
-                </ant>
-              </target>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
+  <profiles>
+    <profile>
+      <id>run-its</id>
+      <activation>
+        <property>
+          <name>skipTests</name>
+          <value>!true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>copy-test-deployables</id>
+                <phase>pre-integration-test</phase>
+                <goals>
+                  <goal>copy</goal>
+                </goals>
+                <configuration>
+                  <outputDirectory>${cargo-test-applications.directory}</outputDirectory>
+                  <artifactItems>
+                    <artifactItem>
+                      <groupId>org.codehaus.cargo</groupId>
+                      <artifactId>simple-war</artifactId>
+                      <type>war</type>
+                    </artifactItem>
+                  </artifactItems>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>start-and-deploy</id>
+                <phase>pre-integration-test</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <!-- Avoid CARGO-827: Cannot build on Windows -->
+                    <replace file="${cargo-ant-buildfiles.directory}/build.xml">
+                      <replacefilter token="extensions\\ant\\samples\\remote-test/../../../../" value="" />
+                      <replacefilter token="\\" value="\" />
+                      <replacefilter token="\:" value=":" />
+                    </replace>
+                    <ant antfile="${cargo-ant-buildfiles.directory}/build.xml">
+                      <target name="start" />
+                      <target name="deploy" />
+                    </ant>
+                  </target>
+                </configuration>
+              </execution>
+              <execution>
+                <id>undeploy-redeploy-and-stop</id>
+                <phase>post-integration-test</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <ant antfile="${cargo-ant-buildfiles.directory}/build.xml">
+                      <target name="undeploy" />
+                      <target name="redeploy" />
+                      <target name="stop" />
+                    </ant>
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
